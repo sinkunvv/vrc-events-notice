@@ -1,0 +1,16 @@
+{
+  "name": "vrc-event-bot",
+  "description": "VRC Event Calendar Twitter Notice Bot",
+  "author": "sinkunvv",
+  "license": "ISC",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "googleapis": "^27.0.0",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.23",
+    "twitter": "^1.7.1"
+  }
+}
