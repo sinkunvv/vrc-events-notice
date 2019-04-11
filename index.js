@@ -9,7 +9,6 @@ const app = require('express')();
 // 初期設定
 // ----------------------------------
 const twitter = require('twitter');
-const fs = require('fs');
 const GoogleCalendar = require('./google_calendar');
 const moment = require('moment-timezone');
 
@@ -19,70 +18,88 @@ const tw_token = {
   access_token_key: process.env.TWITTER_TOKEN_KEY,
   access_token_secret: process.env.TWITTER_TOKEN_SECRET
 };
-moment.tz.setDefault('Asia/Tokyo');
+
 const client = new twitter(tw_token);
 const gcal = new GoogleCalendar();
 const calendarID = process.env.GOOGLE_CALENDAR_ID;
-const today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
-const todayMax = moment(moment().format('YYYY-MM-DD'))
-  .add(1, 'days')
-  .add(-1, 'minutes')
-  .utcOffset('+09:00');
-const tommorow = moment(moment().format('YYYY-MM-DD'))
-  .add(1, 'days')
-  .utcOffset('+09:00');
-const tommorowMax = moment(moment().format('YYYY-MM-DD'))
-  .add(2, 'days')
-  .add(-1, 'minutes')
-  .utcOffset('+09:00');
 
-// 当日のイベント一覧
-const params = {
-  calendarId: calendarID,
-  timeMax: todayMax.format(),
-  timeMin: today.format(),
-  singleEvents: true,
-  orderBy: 'startTime',
-  timeZone: 'Asia/Tokyo'
+// Global Variable
+let today;
+let todayMax;
+let tommorow;
+let tommorowMax;
+let params;
+let _params;
+let now;
+let morning;
+let night;
+let mode;
+moment.tz.setDefault('Asia/Tokyo');
+
+// ----------------------------------
+// 日時再更新
+// ----------------------------------
+const DateRefresh = () => {
+  today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
+  todayMax = moment(moment().format('YYYY-MM-DD'))
+    .add(1, 'days')
+    .add(-1, 'minutes')
+    .utcOffset('+09:00');
+  tommorow = moment(moment().format('YYYY-MM-DD'))
+    .add(1, 'days')
+    .utcOffset('+09:00');
+  tommorowMax = moment(moment().format('YYYY-MM-DD'))
+    .add(2, 'days')
+    .add(-1, 'minutes')
+    .utcOffset('+09:00');
+
+  // 当日のイベント一覧
+  params = {
+    calendarId: calendarID,
+    timeMax: todayMax.format(),
+    timeMin: today.format(),
+    singleEvents: true,
+    orderBy: 'startTime',
+    timeZone: 'Asia/Tokyo'
+  };
+
+  // 翌日のイベント一覧
+  _params = {
+    calendarId: calendarID,
+    timeMax: tommorowMax.format(),
+    timeMin: tommorow.format(),
+    singleEvents: true,
+    orderBy: 'startTime',
+    timeZone: 'Asia/Tokyo'
+  };
+
+  // 現在日時
+  now = moment().utcOffset('+09:00');
+  morning = moment()
+    .hour(6)
+    .minutes(0)
+    .utcOffset('+09:00');
+  night = moment()
+    .hour(23)
+    .minutes(30)
+    .utcOffset('+09:00');
+
+  // 差分取得
+  const m_diff = now.diff(morning, 'minutes');
+  const n_diff = now.diff(night, 'minutes');
+
+  // 0: 通常
+  // 1: 当日一覧告知
+  // 2: 翌日一覧告知
+  mode = 0;
+  if (m_diff >= 0 && m_diff < 15) {
+    // 6時00分頃なら当日の告知
+    mode = 1;
+  } else if (n_diff >= 0 && n_diff < 15) {
+    // 23時30分頃なら翌日の告知
+    mode = 2;
+  }
 };
-
-// 翌日のイベント一覧
-const _params = {
-  calendarId: calendarID,
-  timeMax: tommorowMax.format(),
-  timeMin: tommorow.format(),
-  singleEvents: true,
-  orderBy: 'startTime',
-  timeZone: 'Asia/Tokyo'
-};
-
-// 現在日時
-const now = moment().utcOffset('+09:00');
-const morning = moment()
-  .hour(6)
-  .minutes(0)
-  .utcOffset('+09:00');
-const night = moment()
-  .hour(23)
-  .minutes(30)
-  .utcOffset('+09:00');
-
-// 差分取得
-const m_diff = now.diff(morning, 'minutes');
-const n_diff = now.diff(night, 'minutes');
-
-// 0: 通常
-// 1: 当日一覧告知
-// 2: 翌日一覧告知
-let Mode = 0;
-if (m_diff >= 0 && m_diff < 15) {
-  // 6時00分頃なら当日の告知
-  Mode = 1;
-} else if (n_diff >= 0 && n_diff < 15) {
-  // 23時30分頃なら翌日の告知
-  Mode = 2;
-}
-
 // ----------------------------------
 // Twitter投稿
 // ----------------------------------
@@ -106,10 +123,11 @@ const Posting = msg => {
 // Google Calendar 接続
 // ----------------------------------
 const GetEvent = () => {
+  DateRefresh();
   gcal
     .connect()
     .then(() => {
-      if (Mode == 2) {
+      if (mode == 2) {
         // 翌日のイベント
         return gcal.EventLists(_params);
       } else {
@@ -118,7 +136,7 @@ const GetEvent = () => {
       }
     })
     .then(events => {
-      if (Mode != 0) {
+      if (mode != 0) {
         EventList(events);
       } else {
         EventDetail(events);
@@ -132,7 +150,7 @@ const GetEvent = () => {
 const EventList = events => {
   let list = '【本日のイベント一覧】\n';
 
-  if (Mode == 2) {
+  if (mode == 2) {
     list = '【明日のイベント一覧】\n';
   }
 
