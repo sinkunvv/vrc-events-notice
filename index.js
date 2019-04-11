@@ -141,6 +141,7 @@ const GetEvent = () => {
         EventDetail(events);
       }
     });
+  console.log(params);
 };
 
 // ----------------------------------
