@@ -175,7 +175,6 @@ const EventDetail = events => {
       let start = moment(event.start.dateTime);
       let end = moment(event.end.dateTime);
       let diff = start.diff(now, 'minutes');
-      console.log(now);
       // 30分前
       if (diff > 15 && diff < 45) {
         let detail = '🎉【開始30分前】🎉\n';
