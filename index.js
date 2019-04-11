@@ -56,24 +56,25 @@ const _params = {
   timeZone: 'Asia/Tokyo'
 };
 
-// 0: 通常
-// 1: 当日一覧告知
-// 2: 翌日一覧告知
-let Mode = 0;
-let now = moment().utcOffset('+09:00');
-let morning = moment()
+// 現在日時
+const now = moment().utcOffset('+09:00');
+const morning = moment()
   .hour(6)
   .minutes(0)
   .utcOffset('+09:00');
-let night = moment()
+const night = moment()
   .hour(23)
   .minutes(30)
   .utcOffset('+09:00');
 
 // 差分取得
-let m_diff = now.diff(morning, 'minutes');
-let n_diff = now.diff(night, 'minutes');
+const m_diff = now.diff(morning, 'minutes');
+const n_diff = now.diff(night, 'minutes');
 
+// 0: 通常
+// 1: 当日一覧告知
+// 2: 翌日一覧告知
+let Mode = 0;
 if (m_diff >= 0 && m_diff < 15) {
   // 6時00分頃なら当日の告知
   Mode = 1;
