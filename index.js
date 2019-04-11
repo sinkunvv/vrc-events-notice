@@ -24,37 +24,37 @@ const gcal = new GoogleCalendar();
 const calendarID = process.env.GOOGLE_CALENDAR_ID;
 
 // Global Variable
-let today;
-let todayMax;
-let tommorow;
-let tommorowMax;
-let params;
-let _params;
-let now;
-let morning;
-let night;
-let mode;
+var now = moment().utcOffset('+09:00');
+var morning = moment().utcOffset('+09:00');
+var night = moment().utcOffset('+09:00');
+var today = moment().utcOffset('+09:00');
+var todayMax = moment().utcOffset('+09:00');
+var tommorow = moment().utcOffset('+09:00');
+var tommorowMax = moment().utcOffset('+09:00');
+var params = {};
+var _params = {};
+var mode = 0;
 moment.tz.setDefault('Asia/Tokyo');
 
 // ----------------------------------
 // 日時再更新
 // ----------------------------------
 const DateRefresh = () => {
-  global.today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
-  global.todayMax = moment(moment().format('YYYY-MM-DD'))
+  today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
+  todayMax = moment(moment().format('YYYY-MM-DD'))
     .add(1, 'days')
     .add(-1, 'minutes')
     .utcOffset('+09:00');
-  global.tommorow = moment(moment().format('YYYY-MM-DD'))
+  tommorow = moment(moment().format('YYYY-MM-DD'))
     .add(1, 'days')
     .utcOffset('+09:00');
-  global.tommorowMax = moment(moment().format('YYYY-MM-DD'))
+  tommorowMax = moment(moment().format('YYYY-MM-DD'))
     .add(2, 'days')
     .add(-1, 'minutes')
     .utcOffset('+09:00');
 
   // 当日のイベント一覧
-  global.params = {
+  params = {
     calendarId: calendarID,
     timeMax: todayMax.format(),
     timeMin: today.format(),
@@ -64,7 +64,7 @@ const DateRefresh = () => {
   };
 
   // 翌日のイベント一覧
-  global._params = {
+  _params = {
     calendarId: calendarID,
     timeMax: tommorowMax.format(),
     timeMin: tommorow.format(),
@@ -74,12 +74,12 @@ const DateRefresh = () => {
   };
 
   // 現在日時
-  global.now = moment().utcOffset('+09:00');
-  global.morning = moment()
+  now = moment().utcOffset('+09:00');
+  morning = moment()
     .hour(6)
     .minutes(0)
     .utcOffset('+09:00');
-  global.night = moment()
+  night = moment()
     .hour(23)
     .minutes(30)
     .utcOffset('+09:00');
@@ -91,13 +91,13 @@ const DateRefresh = () => {
   // 0: 通常
   // 1: 当日一覧告知
   // 2: 翌日一覧告知
-  global.mode = 0;
+  mode = 0;
   if (m_diff >= 0 && m_diff < 15) {
     // 6時00分頃なら当日の告知
-    global.mode = 1;
+    mode = 1;
   } else if (n_diff >= 0 && n_diff < 15) {
     // 23時30分頃なら翌日の告知
-    global.mode = 2;
+    mode = 2;
   }
 };
 // ----------------------------------
