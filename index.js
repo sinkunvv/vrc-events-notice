@@ -123,7 +123,6 @@ const Posting = msg => {
 // Google Calendar 接続
 // ----------------------------------
 const GetEvent = () => {
-  DateRefresh();
   gcal
     .connect()
     .then(() => {
@@ -199,6 +198,7 @@ const EventDetail = events => {
 // Express Server Listen
 // ----------------------------------
 app.get('/', (req, res) => {
+  DateRefresh();
   console.log(now);
   res.send(GetEvent());
 });
