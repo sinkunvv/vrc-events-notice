@@ -40,21 +40,21 @@ moment.tz.setDefault('Asia/Tokyo');
 // 日時再更新
 // ----------------------------------
 const DateRefresh = () => {
-  today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
-  todayMax = moment(moment().format('YYYY-MM-DD'))
+  this.today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
+  this.todayMax = moment(moment().format('YYYY-MM-DD'))
     .add(1, 'days')
     .add(-1, 'minutes')
     .utcOffset('+09:00');
-  tommorow = moment(moment().format('YYYY-MM-DD'))
+  this.tommorow = moment(moment().format('YYYY-MM-DD'))
     .add(1, 'days')
     .utcOffset('+09:00');
-  tommorowMax = moment(moment().format('YYYY-MM-DD'))
+  this.tommorowMax = moment(moment().format('YYYY-MM-DD'))
     .add(2, 'days')
     .add(-1, 'minutes')
     .utcOffset('+09:00');
 
   // 当日のイベント一覧
-  params = {
+  this.params = {
     calendarId: calendarID,
     timeMax: todayMax.format(),
     timeMin: today.format(),
@@ -64,7 +64,7 @@ const DateRefresh = () => {
   };
 
   // 翌日のイベント一覧
-  _params = {
+  this._params = {
     calendarId: calendarID,
     timeMax: tommorowMax.format(),
     timeMin: tommorow.format(),
@@ -74,12 +74,12 @@ const DateRefresh = () => {
   };
 
   // 現在日時
-  now = moment().utcOffset('+09:00');
-  morning = moment()
+  this.now = moment().utcOffset('+09:00');
+  this.morning = moment()
     .hour(6)
     .minutes(0)
     .utcOffset('+09:00');
-  night = moment()
+  this.night = moment()
     .hour(23)
     .minutes(30)
     .utcOffset('+09:00');
@@ -91,13 +91,13 @@ const DateRefresh = () => {
   // 0: 通常
   // 1: 当日一覧告知
   // 2: 翌日一覧告知
-  mode = 0;
+  this.mode = 0;
   if (m_diff >= 0 && m_diff < 15) {
     // 6時00分頃なら当日の告知
-    mode = 1;
+    this.mode = 1;
   } else if (n_diff >= 0 && n_diff < 15) {
     // 23時30分頃なら翌日の告知
-    mode = 2;
+    this.mode = 2;
   }
 };
 // ----------------------------------
