@@ -26,13 +26,9 @@ const calendarID = process.env.GOOGLE_CALENDAR_ID;
 // Global Variable
 var now = moment().utcOffset('+09:00');
 var morning = moment().utcOffset('+09:00');
-var night = moment().utcOffset('+09:00');
 var today = moment().utcOffset('+09:00');
 var todayMax = moment().utcOffset('+09:00');
-var tommorow = moment().utcOffset('+09:00');
-var tommorowMax = moment().utcOffset('+09:00');
 var params = {};
-var _params = {};
 var mode = 0;
 moment.tz.setDefault('Asia/Tokyo');
 
@@ -43,13 +39,6 @@ const DateRefresh = () => {
   today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
   todayMax = moment(moment().format('YYYY-MM-DD'))
     .add(1, 'days')
-    .add(-1, 'minutes')
-    .utcOffset('+09:00');
-  tommorow = moment(moment().format('YYYY-MM-DD'))
-    .add(1, 'days')
-    .utcOffset('+09:00');
-  tommorowMax = moment(moment().format('YYYY-MM-DD'))
-    .add(2, 'days')
     .add(-1, 'minutes')
     .utcOffset('+09:00');
 
@@ -63,41 +52,22 @@ const DateRefresh = () => {
     timeZone: 'Asia/Tokyo'
   };
 
-  // 翌日のイベント一覧
-  _params = {
-    calendarId: calendarID,
-    timeMax: tommorowMax.format(),
-    timeMin: tommorow.format(),
-    singleEvents: true,
-    orderBy: 'startTime',
-    timeZone: 'Asia/Tokyo'
-  };
-
   // 現在日時
   now = moment().utcOffset('+09:00');
   morning = moment()
     .hour(6)
     .minutes(0)
     .utcOffset('+09:00');
-  night = moment()
-    .hour(23)
-    .minutes(30)
-    .utcOffset('+09:00');
 
   // 差分取得
   const m_diff = now.diff(morning, 'minutes');
-  const n_diff = now.diff(night, 'minutes');
 
   // 0: 通常
   // 1: 当日一覧告知
-  // 2: 翌日一覧告知
   mode = 0;
   if (m_diff >= 0 && m_diff < 15) {
     // 6時00分頃なら当日の告知
     mode = 1;
-  } else if (n_diff >= 0 && n_diff < 15) {
-    // 23時30分頃なら翌日の告知
-    mode = 2;
   }
 };
 // ----------------------------------
@@ -126,13 +96,8 @@ const GetEvent = () => {
   gcal
     .connect()
     .then(() => {
-      if (mode == 2) {
-        // 翌日のイベント
-        return gcal.EventLists(_params);
-      } else {
-        // 当日のイベント
-        return gcal.EventLists(params);
-      }
+      // 当日のイベント
+      return gcal.EventLists(params);
     })
     .then(events => {
       if (mode != 0) {
@@ -147,22 +112,39 @@ const GetEvent = () => {
 // 今日のイベント一覧
 // ----------------------------------
 const EventList = events => {
+  let overflow = false;
   let list = '【本日のイベント一覧】\n';
-
-  if (mode == 2) {
-    list = '【明日のイベント一覧】\n';
-  }
+  let last = 'イベントがいっぱいで紹介しきれません!\n';
+  last += 'その他のイベント情報は公式サイトをチェック✨\n';
+  last += 'https://sites.google.com/view/vrchat-event';
 
   // イベント数分だけループ
   if (events.length) {
     events.map((event, i) => {
       let start = moment(event.start.dateTime).format('HH:mm');
-      let end = moment(event.end.dateTime).format('HH:mm');
-      list += `${start} ~ ${end} : ${event.summary}\n`;
+      let tmp = list;
+      tmp += `${start} 開始🎉 - ${event.summary}\n`;
+
+      // ツイートが140文字超えたらカレンダーへ誘導
+      if((tmp.length + last.length) > 140){
+        list = tmp + last;
+        overflow = true;
+        break;
+      }
+      list = tmp;
     });
   } else {
     list += '何も登録されていないみたいです...';
   }
+
+  // 140文字を超えてなければ後文言変更
+  if(!overflow) {
+    last = '他の日のイベント情報は公式サイトをチェック✨\n';
+    last += 'https://sites.google.com/view/vrchat-event';
+    list += last;
+  }
+
+  // Twitter投稿
   Posting(list);
 };
 
