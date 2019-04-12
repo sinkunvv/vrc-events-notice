@@ -54,6 +54,7 @@ const DateRefresh = () => {
 
   // 現在日時
   now = moment().utcOffset('+09:00');
+
   morning = moment()
     .hour(6)
     .minutes(0)
@@ -120,7 +121,7 @@ const EventList = events => {
 
   // イベント数分だけループ
   if (events.length) {
-    events.forEach(event => {
+    events.some(event => {
       let start = moment(event.start.dateTime).format('HH:mm');
       let tmp = list;
       tmp += `${start} 開始🎉 - ${event.summary}\n`;
@@ -129,7 +130,7 @@ const EventList = events => {
       if (tmp.length + last.length > 140) {
         list = tmp + last;
         overflow = true;
-        break;
+        return true;
       }
       list = tmp;
     });
@@ -143,7 +144,7 @@ const EventList = events => {
     last += 'https://sites.google.com/view/vrchat-event';
     list += last;
   }
-
+  console.log(list);
   // Twitter投稿
   Posting(list);
 };
@@ -153,7 +154,7 @@ const EventList = events => {
 // ----------------------------------
 const EventDetail = events => {
   if (events.length) {
-    events.forEach(event => {
+    events.some(event => {
       let start = moment(event.start.dateTime);
       let end = moment(event.end.dateTime);
       let diff = start.diff(now, 'minutes');
