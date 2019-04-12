@@ -120,13 +120,13 @@ const EventList = events => {
 
   // イベント数分だけループ
   if (events.length) {
-    events.map((event, i) => {
+    events.forEach(event => {
       let start = moment(event.start.dateTime).format('HH:mm');
       let tmp = list;
       tmp += `${start} 開始🎉 - ${event.summary}\n`;
 
       // ツイートが140文字超えたらカレンダーへ誘導
-      if((tmp.length + last.length) > 140){
+      if (tmp.length + last.length > 140) {
         list = tmp + last;
         overflow = true;
         break;
@@ -138,7 +138,7 @@ const EventList = events => {
   }
 
   // 140文字を超えてなければ後文言変更
-  if(!overflow) {
+  if (!overflow) {
     last = '他の日のイベント情報は公式サイトをチェック✨\n';
     last += 'https://sites.google.com/view/vrchat-event';
     list += last;
@@ -153,7 +153,7 @@ const EventList = events => {
 // ----------------------------------
 const EventDetail = events => {
   if (events.length) {
-    events.map((event, i) => {
+    events.forEach(event => {
       let start = moment(event.start.dateTime);
       let end = moment(event.end.dateTime);
       let diff = start.diff(now, 'minutes');
