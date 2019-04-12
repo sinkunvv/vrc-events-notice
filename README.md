@@ -44,3 +44,14 @@ TWITTER_TOKEN_SECRET =
 
 ### 問い合わせ
 https://twitter.com/sinkunvv  
+
+## 使い方
+1. Google API Consoleにアクセス
+2. プロジェクトを作成する
+3. Cloud Strage JSON API, Google Calendar APIを有効にする
+4. 認証情報追加のプルダウンを開きOAuth2.0クライアントIDを選択する
+5. 識別できる名前に変更し、タイプはその他にして作成する
+6. noed local.jsで認証トークンを発行する
+7. herokuにトークンを含めてpushする
+8. herokuの環境設定値を設定する
+
