@@ -28,8 +28,11 @@ var now = moment().utcOffset('+09:00');
 var morning = moment().utcOffset('+09:00');
 var today = moment().utcOffset('+09:00');
 var todayMax = moment().utcOffset('+09:00');
+var weeks = moment().utcOffset('+09:00');
+var weeksMax = moment().utcOffset('+09:00');
+
 var params = {};
-var mode = 0;
+var mode = false;
 moment.tz.setDefault('Asia/Tokyo');
 
 // ----------------------------------
@@ -39,6 +42,14 @@ const DateRefresh = () => {
   today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
   todayMax = moment(moment().format('YYYY-MM-DD'))
     .add(1, 'days')
+    .add(-1, 'minutes')
+    .utcOffset('+09:00');
+
+  weeks = moment(moment().format('YYYY-MM-DD'))
+    .add(1, 'weeks')
+    .utcOffset('+09:00');
+  weeksMax = moment(moment().format('YYYY-MM-DD'))
+    .add(1, 'weeks')
     .add(-1, 'minutes')
     .utcOffset('+09:00');
 
@@ -52,6 +63,15 @@ const DateRefresh = () => {
     timeZone: 'Asia/Tokyo'
   };
 
+  // 来週のイベント
+  _params = {
+    calendarId: calendarID,
+    timeMax: weeksMax.format(),
+    timeMin: weeks.format(),
+    singleEvents: true,
+    orderBy: 'startTime',
+    timeZone: 'Asia/Tokyo'
+  };
   // 現在日時
   now = moment().utcOffset('+09:00');
 
@@ -65,10 +85,10 @@ const DateRefresh = () => {
 
   // 0: 通常
   // 1: 当日一覧告知
-  mode = 0;
+  mode = false;
   if (m_diff >= 0 && m_diff < 15) {
     // 6時00分頃なら当日の告知
-    mode = 1;
+    mode = true;
   }
 };
 // ----------------------------------
@@ -101,14 +121,29 @@ const GetEvent = () => {
       return gcal.EventLists(params);
     })
     .then(events => {
-      if (mode != 0) {
+      if (mode) {
         EventList(events);
+        EventListNextWeeks();
       } else {
         EventDetail(events);
       }
     });
 };
 
+// ----------------------------------
+// Google Calendar 接続 翌週
+// ----------------------------------
+const GetEventNextWeeks = () => {
+  gcal
+    .connect()
+    .then(() => {
+      // 当日のイベント
+      return gcal.EventLists(_params);
+    })
+    .then(events => {
+      EventListNextWeeks(events);
+    });
+};
 // ----------------------------------
 // 今日のイベント一覧
 // ----------------------------------
@@ -144,6 +179,39 @@ const EventList = events => {
     last += 'https://sites.google.com/view/vrchat-event';
     list += last;
   }
+  console.log(list);
+  // Twitter投稿
+  Posting(list);
+};
+
+// ----------------------------------
+// 来週のイベント一覧
+// ----------------------------------
+const EventListNextWeeks = events => {
+  let overflow = false;
+  let list = '【1週間後のイベント一覧】\n';
+  let last = '詳細は公式サイトをチェック✨';
+  last += 'https://sites.google.com/view/vrchat-event';
+
+  // イベント数分だけループ
+  if (events.length) {
+    events.some(event => {
+      let start = moment(event.start.dateTime).format('HH:mm');
+      let tmp = list;
+      tmp += `${start} 開始🎉 - ${event.summary}\n`;
+
+      // ツイートが140文字超えたらカレンダーへ誘導
+      if (tmp.length + last.length > 140) {
+        list = tmp + last;
+        overflow = true;
+        return true;
+      }
+      list = tmp;
+    });
+  } else {
+    list += '何も登録されていないみたいです...';
+  }
+
   console.log(list);
   // Twitter投稿
   Posting(list);
