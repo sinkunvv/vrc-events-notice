@@ -54,7 +54,7 @@ https://twitter.com/sinkunvv
 4-2. 公開にするかは任意、テストならテストユーザを登録しておく
 5. 認証情報追加のプルダウンを開きOAuth2.0クライアントIDを選択する
 6. 識別できる名前に変更し、タイプはデスクトップにして作成する
-7. noed local.jsで認証トークンを発行する
+7. node local.jsで認証トークンを発行する
 7-1. 実行すると発行されるURLでOAuth認証を通す
 7-2. http://localhost/?code={{認証トークン}}&scope=https://www.googleapis.com/auth/calendar.readonly
 8. herokuにトークンを含めてpushする
