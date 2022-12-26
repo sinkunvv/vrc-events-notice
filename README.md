@@ -48,10 +48,15 @@ https://twitter.com/sinkunvv
 ## 使い方
 1. Google API Consoleにアクセス
 2. プロジェクトを作成する
-3. Cloud Strage JSON API, Google Calendar APIを有効にする
-4. 認証情報追加のプルダウンを開きOAuth2.0クライアントIDを選択する
-5. 識別できる名前に変更し、タイプはその他にして作成する
-6. noed local.jsで認証トークンを発行する
-7. herokuにトークンを含めてpushする
-8. herokuの環境設定値を設定する
+3. Google Calendar APIを有効にする
+4. APIとサービスからOAuth同意画面を作成する
+4-1. ユーザの種類は外部
+4-2. 公開にするかは任意、テストならテストユーザを登録しておく
+5. 認証情報追加のプルダウンを開きOAuth2.0クライアントIDを選択する
+6. 識別できる名前に変更し、タイプはデスクトップにして作成する
+7. noed local.jsで認証トークンを発行する
+7-1. 実行すると発行されるURLでOAuth認証を通す
+7-2. http://localhost/?code={{認証トークン}}&scope=https://www.googleapis.com/auth/calendar.readonly
+8. herokuにトークンを含めてpushする
+9. herokuの環境設定値を設定する
 
