@@ -16,7 +16,7 @@ class GoogleCalendar {
   defaults() {
     return {
       scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
-      tokenPath: 'g_token.json'
+      tokenPath: 'g_token.json',
     };
   }
 
@@ -30,7 +30,7 @@ class GoogleCalendar {
           return console.log('Error loading client secret file:', err);
         }
 
-        this.authorize(JSON.parse(content)).then(auth => {
+        this.authorize(JSON.parse(content)).then((auth) => {
           this.config.auth = auth;
           resolve();
         });
@@ -43,11 +43,7 @@ class GoogleCalendar {
   // ----------------------------------
   authorize(credentials) {
     const { client_secret, client_id, redirect_uris } = credentials.installed;
-    const OAuth2Client = new google.auth.OAuth2(
-      client_id,
-      client_secret,
-      redirect_uris[0]
-    );
+    const OAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
     return new Promise((resolve, reject) => {
       fs.readFile(this.config.tokenPath, (err, token) => {
         if (err) {
@@ -63,7 +59,7 @@ class GoogleCalendar {
               reject();
             }
             OAuth2Client.setCredentials(token);
-            fs.writeFile(this.config.tokenPath, JSON.stringify(token), err => {
+            fs.writeFile(this.config.tokenPath, JSON.stringify(token), (err) => {
               if (err) {
                 console.log(err);
                 reject();
@@ -83,17 +79,17 @@ class GoogleCalendar {
   getAccessToken(OAuth2Client) {
     const authURL = OAuth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: this.config.scopes
+      scope: this.config.scopes,
     });
 
     console.log('認証URL:', authURL);
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     });
 
     return new Promise((resolve, reject) => {
-      rl.question('認証トークン:', code => {
+      rl.question('認証トークン:', (code) => {
         rl.close();
         OAuth2Client.getToken(code, (err, token) => {
           if (err) {
@@ -102,7 +98,7 @@ class GoogleCalendar {
           OAuth2Client.setCredentials(token);
 
           // 発行したトークンを出力
-          fs.writeFile(this.config.tokenPath, JSON.stringify(token), err => {
+          fs.writeFile(this.config.tokenPath, JSON.stringify(token), (err) => {
             if (err) {
               console.log(err);
               reject();
@@ -122,7 +118,7 @@ class GoogleCalendar {
     return new Promise((resolve, reject) => {
       const calendar = google.calendar({
         version: 'v3',
-        auth: this.config.auth
+        auth: this.config.auth,
       });
       calendar.events.list(params, (err, res) => {
         if (err) {
@@ -148,10 +144,7 @@ const gcal = new GoogleCalendar();
 // ----------------------------------
 const DateRefresh = () => {
   today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
-  todayMax = moment(moment().format('YYYY-MM-DD'))
-    .add(1, 'days')
-    .add(-1, 'minutes')
-    .utcOffset('+09:00');
+  todayMax = moment(moment().format('YYYY-MM-DD')).add(1, 'days').add(-1, 'minutes').utcOffset('+09:00');
 
   // 当日のイベント一覧
   params = {
@@ -160,7 +153,7 @@ const DateRefresh = () => {
     timeMin: today.format(),
     singleEvents: true,
     orderBy: 'startTime',
-    timeZone: 'Asia/Tokyo'
+    timeZone: 'Asia/Tokyo',
   };
 };
 
@@ -174,7 +167,7 @@ const GetEvent = () => {
       // 当日のイベント
       return gcal.EventLists(params);
     })
-    .then(events => {
+    .then((events) => {
       EventList(events);
     });
 };
@@ -182,16 +175,16 @@ const GetEvent = () => {
 // ----------------------------------
 // 今日のイベント一覧
 // ----------------------------------
-const EventList = events => {
+const EventList = (events) => {
   let overflow = false;
   let list = '【本日のイベント一覧】\n';
   let last = 'イベントがいっぱいで紹介しきれません!\n';
   last += 'その他のイベント情報は公式サイトをチェック✨\n';
-  last += 'https://sites.google.com/view/vrchat-event';
+  last += 'https://vrceve.com/';
 
   // イベント数分だけループ
   if (events.length) {
-    events.some(event => {
+    events.some((event) => {
       let start = moment(event.start.dateTime).format('HH:mm');
       let tmp = list;
       tmp += `${start} 開始🎉 - ${event.summary}\n`;
@@ -211,7 +204,7 @@ const EventList = events => {
   // 140文字を超えてなければ後文言変更
   if (!overflow) {
     last = '他の日のイベント情報は公式サイトをチェック✨\n';
-    last += 'https://sites.google.com/view/vrchat-event';
+    last += 'https://vrceve.com/';
     list += last;
   }
   console.log(list);

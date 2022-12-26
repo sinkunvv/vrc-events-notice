@@ -16,7 +16,7 @@ const tw_token = {
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
   access_token_key: process.env.TWITTER_TOKEN_KEY,
-  access_token_secret: process.env.TWITTER_TOKEN_SECRET
+  access_token_secret: process.env.TWITTER_TOKEN_SECRET,
 };
 
 const client = new twitter(tw_token);
@@ -40,18 +40,10 @@ moment.tz.setDefault('Asia/Tokyo');
 // ----------------------------------
 const DateRefresh = () => {
   today = moment(moment().format('YYYY-MM-DD')).utcOffset('+09:00');
-  todayMax = moment(moment().format('YYYY-MM-DD'))
-    .add(1, 'days')
-    .add(-1, 'minutes')
-    .utcOffset('+09:00');
+  todayMax = moment(moment().format('YYYY-MM-DD')).add(1, 'days').add(-1, 'minutes').utcOffset('+09:00');
 
-  weeks = moment(moment().format('YYYY-MM-DD'))
-    .add(1, 'weeks')
-    .utcOffset('+09:00');
-  weeksMax = moment(moment().format('YYYY-MM-DD'))
-    .add(1, 'weeks')
-    .add(-1, 'minutes')
-    .utcOffset('+09:00');
+  weeks = moment(moment().format('YYYY-MM-DD')).add(1, 'weeks').utcOffset('+09:00');
+  weeksMax = moment(moment().format('YYYY-MM-DD')).add(1, 'weeks').add(-1, 'minutes').utcOffset('+09:00');
 
   // 当日のイベント一覧
   params = {
@@ -60,7 +52,7 @@ const DateRefresh = () => {
     timeMin: today.format(),
     singleEvents: true,
     orderBy: 'startTime',
-    timeZone: 'Asia/Tokyo'
+    timeZone: 'Asia/Tokyo',
   };
 
   // 来週のイベント
@@ -70,15 +62,12 @@ const DateRefresh = () => {
     timeMin: weeks.format(),
     singleEvents: true,
     orderBy: 'startTime',
-    timeZone: 'Asia/Tokyo'
+    timeZone: 'Asia/Tokyo',
   };
   // 現在日時
   now = moment().utcOffset('+09:00');
 
-  morning = moment()
-    .hour(6)
-    .minutes(0)
-    .utcOffset('+09:00');
+  morning = moment().hour(6).minutes(0).utcOffset('+09:00');
 
   // 差分取得
   const m_diff = now.diff(morning, 'minutes');
@@ -94,11 +83,11 @@ const DateRefresh = () => {
 // ----------------------------------
 // Twitter投稿
 // ----------------------------------
-const Posting = msg => {
+const Posting = (msg) => {
   client.post(
     'statuses/update',
     {
-      status: msg
+      status: msg,
     },
     (error, tweet, response) => {
       if (!error) {
@@ -120,7 +109,7 @@ const GetEvent = () => {
       // 当日のイベント
       return gcal.EventLists(params);
     })
-    .then(events => {
+    .then((events) => {
       if (mode) {
         EventList(events);
         EventListNextWeeks();
@@ -140,23 +129,23 @@ const GetEventNextWeeks = () => {
       // 当日のイベント
       return gcal.EventLists(_params);
     })
-    .then(events => {
+    .then((events) => {
       EventListNextWeeks(events);
     });
 };
 // ----------------------------------
 // 今日のイベント一覧
 // ----------------------------------
-const EventList = events => {
+const EventList = (events) => {
   let overflow = false;
   let list = '【本日のイベント一覧】\n';
   let last = 'イベントがいっぱいで紹介しきれません!\n';
   last += 'その他のイベント情報は公式サイトをチェック✨\n';
-  last += 'https://sites.google.com/view/vrchat-event';
+  last += 'https://vrceve.com/';
 
   // イベント数分だけループ
   if (events.length) {
-    events.some(event => {
+    events.some((event) => {
       let start = moment(event.start.dateTime).format('HH:mm');
       let tmp = list;
       tmp += `${start} 開始🎉 - ${event.summary}\n`;
@@ -176,7 +165,7 @@ const EventList = events => {
   // 140文字を超えてなければ後文言変更
   if (!overflow) {
     last = '他の日のイベント情報は公式サイトをチェック✨\n';
-    last += 'https://sites.google.com/view/vrchat-event';
+    last += 'https://vrceve.com/';
     list += last;
   }
   console.log(list);
@@ -187,15 +176,15 @@ const EventList = events => {
 // ----------------------------------
 // 来週のイベント一覧
 // ----------------------------------
-const EventListNextWeeks = events => {
+const EventListNextWeeks = (events) => {
   let overflow = false;
   let list = '【1週間後のイベント一覧】\n';
   let last = '詳細は公式サイトをチェック✨';
-  last += 'https://sites.google.com/view/vrchat-event';
+  last += 'https://vrceve.com/';
 
   // イベント数分だけループ
   if (events.length) {
-    events.some(event => {
+    events.some((event) => {
       let start = moment(event.start.dateTime).format('HH:mm');
       let tmp = list;
       tmp += `${start} 開始🎉 - ${event.summary}\n`;
@@ -220,9 +209,9 @@ const EventListNextWeeks = events => {
 // ----------------------------------
 // 開始30分前のイベント詳細
 // ----------------------------------
-const EventDetail = events => {
+const EventDetail = (events) => {
   if (events.length) {
-    events.some(event => {
+    events.some((event) => {
       let start = moment(event.start.dateTime);
       let end = moment(event.end.dateTime);
       let diff = start.diff(now, 'minutes');
