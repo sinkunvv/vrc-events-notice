@@ -6,7 +6,7 @@ const fs = require('fs');
 const readline = require('readline');
 
 // 取得元カレンダーID
-const calendarID = '1b1et1slg27jm1rgdltu3mn2j4@group.calendar.google.com';
+const calendarID = 't4vhbn0l7m309rkbbnd7321p3o@group.calendar.google.com';
 
 class GoogleCalendar {
   constructor(config) {

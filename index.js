@@ -21,7 +21,8 @@ const tw_token = {
 
 const client = new twitter(tw_token);
 const gcal = new GoogleCalendar();
-const calendarID = process.env.GOOGLE_CALENDAR_ID;
+// 取得元カレンダーID
+const calendarID = 't4vhbn0l7m309rkbbnd7321p3o@group.calendar.google.com';
 
 // Global Variable
 var now = moment().utcOffset('+09:00');
