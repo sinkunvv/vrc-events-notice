@@ -113,7 +113,7 @@ const GetEvent = () => {
     .then((events) => {
       if (mode) {
         EventList(events);
-        EventListNextWeeks();
+        // GetEventNextWeeks();
       } else {
         EventDetail(events);
       }
@@ -216,6 +216,7 @@ const EventDetail = (events) => {
       let start = moment(event.start.dateTime);
       let end = moment(event.end.dateTime);
       let diff = start.diff(now, 'minutes');
+
       // 30分前
       if (diff > 15 && diff < 45) {
         let detail = '🎉【開始30分前】🎉\n';
@@ -239,7 +240,6 @@ const EventDetail = (events) => {
 // ----------------------------------
 app.get('/', (req, res) => {
   DateRefresh();
-  console.log(now);
   res.send(GetEvent());
 });
 app.listen(process.env.PORT || 3000);
